@@ -1,19 +1,213 @@
-# 🎈 Blank app template
+# 📐 단위 변환 학습 웹앱
 
-A simple Streamlit app template for you to modify!
+초등학교 3~4학년 수학 '도형과 측정' 영역 학습을 돕는 **단위 변환 연습** Streamlit 웹앱입니다.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)
 
-### How to run it on your own machine
+---
 
-1. Install the requirements
+## 📌 프로젝트 목적
 
-   ```
-   $ pip install -r requirements.txt
-   ```
+학생들이 다음 단위 변환을 재미있게 연습할 수 있도록 설계되었습니다:
+- **길이**: mm, cm, m, km
+- **들이**: mL, L  
+- **무게**: g, kg, t
 
-2. Run the app
+---
 
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+## ✨ 주요 기능
+
+### 1️⃣ **초기 화면 - 학습 영역 선택**
+- 📏 **길이** 변환 학습
+- 🥤 **들이** 변환 학습
+- ⚖️ **무게** 변환 학습
+
+### 2️⃣ **길이 변환 문제**
+```
+문제 예: 10cm를 mm, cm, m, km으로 변환하세요
+- 범위: 100mm ~ 100,000mm
+- 정답이면: 새로운 난수 문제 자동 생성
+- 오답이면: 메시지 표시 후 재풀이 기회 제공
+```
+
+### 3️⃣ **들이 변환 문제**
+```
+문제 예: 1000mL을 mL, L로 변환하세요
+- 범위: 10mL ~ 100,000mL
+- 정답이면: 새로운 난수 문제 자동 생성
+- 오답이면: 메시지 표시 후 재풀이 기회 제공
+```
+
+### 4️⃣ **무게 변환 문제**
+```
+문제 예: 10kg을 g, kg, t로 변환하세요
+- 범위: 10,000g ~ 1,000,000g
+- 정답이면: 새로운 난수 문제 자동 생성
+- 오답이면: 메시지 표시 후 재풀이 기회 제공
+```
+
+### 5️⃣ **재시작 기능**
+- 화면 하단의 "🔄 재시작" 버튼으로 초기 화면으로 돌아가기
+
+---
+
+## 🚀 실행 방법
+
+### 1. 요구사항 설치
+```bash
+pip install -r requirements.txt
+```
+
+### 2. 앱 실행
+```bash
+streamlit run streamlit_app.py
+```
+
+### 3. 웹 브라우저에서 접속
+```
+http://localhost:8501
+```
+
+---
+
+## 📁 프로젝트 구조
+
+```
+blank-app/
+├── streamlit_app.py          # 메인 Streamlit 애플리케이션
+├── utils/
+│   ├── __init__.py           # 패키지 초기화
+│   ├── converter.py          # 단위 변환 함수
+│   └── generator.py          # 문제 생성 함수
+├── requirements.txt          # 의존성 패키지 목록
+├── README.md                 # 프로젝트 설명 (이 파일)
+└── LICENSE                   # 라이선스
+```
+
+---
+
+## 🛠 기술 스택
+
+| 기술 | 버전 | 설명 |
+|------|------|------|
+| Python | 3.8+ | 프로그래밍 언어 |
+| Streamlit | 1.28+ | 웹 애플리케이션 프레임워크 |
+
+---
+
+## 📊 코드 설명
+
+### `converter.py` - 단위 변환 함수
+
+#### `convert_length(value_mm)`
+밀리미터를 모든 길이 단위로 변환합니다.
+```python
+result = convert_length(100)
+# {'mm': 100, 'cm': 10, 'm': 0.1, 'km': 0.0001}
+```
+
+#### `convert_capacity(value_ml)`
+밀리리터를 모든 들이 단위로 변환합니다.
+```python
+result = convert_capacity(1000)
+# {'mL': 1000, 'L': 1}
+```
+
+#### `convert_weight(value_g)`
+그램을 모든 무게 단위로 변환합니다.
+```python
+result = convert_weight(1000)
+# {'g': 1000, 'kg': 1, 't': 0.001}
+```
+
+#### `check_answer(user_answers, correct_answers)`
+사용자 입력이 정답과 일치하는지 확인합니다 (소수점 오차 허용).
+
+---
+
+### `generator.py` - 문제 생성 함수
+
+각 영역별 난수를 생성하고 임의의 단위로 문제를 제시합니다.
+
+#### `generate_length_problem()`
+- 100~100,000mm 범위의 난수 생성
+- mm, cm, m, km 중 랜덤하게 선택된 단위로 제시
+
+#### `generate_capacity_problem()`
+- 10~100,000mL 범위의 난수 생성
+- mL 또는 L 중 랜덤하게 선택된 단위로 제시
+
+#### `generate_weight_problem()`
+- 10,000~1,000,000g 범위의 난수 생성
+- g, kg, t 중 랜덤하게 선택된 단위로 제시
+
+---
+
+### `streamlit_app.py` - 메인 애플리케이션
+
+#### 주요 기능
+1. **세션 상태 관리** (`st.session_state`)
+   - 현재 페이지 추적
+   - 문제 데이터 저장
+   - 피드백 메시지 관리
+   - 문제 풀이 횟수 기록
+
+2. **페이지 구성**
+   - `show_home_page()`: 초기 화면 (3가지 선택)
+   - `show_length_problem()`: 길이 변환 문제
+   - `show_capacity_problem()`: 들이 변환 문제
+   - `show_weight_problem()`: 무게 변환 문제
+
+3. **UI 디자인**
+   - 큰 폰트로 문제 표시
+   - 단위별 별도 입력 필드
+   - 정답/오답 피드백 메시지
+   - 성공 시 풍선 애니메이션
+
+---
+
+## 🎓 학습 효과
+
+✅ **개념 이해**: 단위 간 관계를 반복 학습  
+✅ **계산 능력**: 실시간 계산 연습  
+✅ **즉시 피드백**: 정답 여부를 바로 확인  
+✅ **자기주도 학습**: 자유로운 속도로 진행  
+✅ **재미있는 학습**: 게임 형식의 인터페이스  
+
+---
+
+## 🔄 향후 개선 방향
+
+- [ ] 점수 및 통계 기록 기능
+- [ ] 난이도 선택 옵션 (쉬움/보통/어려움)
+- [ ] 시간 제한 모드
+- [ ] 다양한 테마 색상 지원
+- [ ] 모바일 반응형 디자인 개선
+- [ ] 학부모 대시보드 추가
+- [ ] 학생 진도 저장 기능
+
+---
+
+## 📝 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 공개됩니다.
+
+---
+
+## 👨‍💻 개발자
+
+**GitHub Copilot**  
+2025년 12월
+
+---
+
+## 🤝 기여하기
+
+버그 보고나 기능 제안은 이슈를 통해 해주세요!
+
+---
+
+## 📧 문의사항
+
+이 프로젝트에 대한 질문이나 피드백은 GitHub 이슈를 통해 주세요.

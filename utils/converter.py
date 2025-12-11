@@ -83,3 +83,99 @@ def check_answer(user_answers, correct_answers, tolerance='0.0001'):
             return False
     
     return True
+
+
+def get_length_hint(user_answers, correct_answers):
+    """
+    길이 문제에서 틀린 단위에 대한 힌트 생성
+    Args:
+        user_answers (list): [mm, cm, m, km]
+        correct_answers (list): [mm, cm, m, km]
+    Returns:
+        list: 틀린 단위별 힌트 메시지
+    """
+    units = ['mm', 'cm', 'm', 'km']
+    hints = []
+    tolerance = Decimal('0.0001')
+    
+    for i, (user, correct) in enumerate(zip(user_answers, correct_answers)):
+        try:
+            user_value = Decimal(str(user)) if not isinstance(user, Decimal) else user
+            correct_value = Decimal(str(correct)) if not isinstance(correct, Decimal) else correct
+            
+            if abs(user_value - correct_value) > tolerance:
+                unit = units[i]
+                if unit == 'mm':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1cm = 10mm 관계를 다시 확인해보세요.")
+                elif unit == 'cm':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1m = 100cm 관계를 다시 확인해보세요.")
+                elif unit == 'm':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1km = 1000m 관계를 다시 확인해보세요.")
+                elif unit == 'km':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1km = 1,000,000mm 관계를 다시 확인해보세요.")
+        except:
+            pass
+    
+    return hints
+
+
+def get_capacity_hint(user_answers, correct_answers):
+    """
+    들이 문제에서 틀린 단위에 대한 힌트 생성
+    Args:
+        user_answers (list): [mL, L]
+        correct_answers (list): [mL, L]
+    Returns:
+        list: 틀린 단위별 힌트 메시지
+    """
+    units = ['mL', 'L']
+    hints = []
+    tolerance = Decimal('0.0001')
+    
+    for i, (user, correct) in enumerate(zip(user_answers, correct_answers)):
+        try:
+            user_value = Decimal(str(user)) if not isinstance(user, Decimal) else user
+            correct_value = Decimal(str(correct)) if not isinstance(correct, Decimal) else correct
+            
+            if abs(user_value - correct_value) > tolerance:
+                unit = units[i]
+                if unit == 'mL':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1L = 1,000mL 관계를 다시 확인해보세요.")
+                elif unit == 'L':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1L = 1,000mL 관계를 다시 확인해보세요.")
+        except:
+            pass
+    
+    return hints
+
+
+def get_weight_hint(user_answers, correct_answers):
+    """
+    무게 문제에서 틀린 단위에 대한 힌트 생성
+    Args:
+        user_answers (list): [g, kg, t]
+        correct_answers (list): [g, kg, t]
+    Returns:
+        list: 틀린 단위별 힌트 메시지
+    """
+    units = ['g', 'kg', 't']
+    hints = []
+    tolerance = Decimal('0.0001')
+    
+    for i, (user, correct) in enumerate(zip(user_answers, correct_answers)):
+        try:
+            user_value = Decimal(str(user)) if not isinstance(user, Decimal) else user
+            correct_value = Decimal(str(correct)) if not isinstance(correct, Decimal) else correct
+            
+            if abs(user_value - correct_value) > tolerance:
+                unit = units[i]
+                if unit == 'g':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1kg = 1,000g 관계를 다시 확인해보세요.")
+                elif unit == 'kg':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1kg = 1,000g, 1t = 1,000kg 관계를 다시 확인해보세요.")
+                elif unit == 't':
+                    hints.append(f"❌ {unit} 단위 변환이 틀렸습니다.\n💡 1t = 1,000kg = 1,000,000g 관계를 다시 확인해보세요.")
+        except:
+            pass
+    
+    return hints

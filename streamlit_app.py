@@ -11,7 +11,12 @@ from utils.generator import (
     generate_capacity_problem,
     generate_weight_problem
 )
-from utils.converter import check_answer
+from utils.converter import (
+    check_answer,
+    get_length_hint,
+    get_capacity_hint,
+    get_weight_hint
+)
 
 
 # 페이지 설정
@@ -106,6 +111,8 @@ def initialize_session_state():
         st.session_state.feedback_message = ''
     if 'problem_count' not in st.session_state:
         st.session_state.problem_count = 0
+    if 'current_hints' not in st.session_state:
+        st.session_state.current_hints = []
 
 
 initialize_session_state()
@@ -242,6 +249,12 @@ def show_length_problem():
                 f"<div class='error-message'>{st.session_state.feedback_message}</div>",
                 unsafe_allow_html=True
             )
+            
+            # 오답 시 힌트 표시
+            if 'current_hints' in st.session_state and st.session_state.current_hints:
+                with st.expander("🔍 힌트 보기"):
+                    for hint in st.session_state.current_hints:
+                        st.info(hint)
     
     # 입력 필드 - text_input으로 변경
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
@@ -293,6 +306,7 @@ def show_length_problem():
                 st.rerun()
             else:
                 st.session_state.feedback_message = "❌ 정답이 옳지 않습니다. 다시 풀어보세요."
+                st.session_state.current_hints = get_length_hint(user_answers, correct_answers)
                 st.rerun()
     
     # 통계
@@ -342,6 +356,12 @@ def show_capacity_problem():
                 f"<div class='error-message'>{st.session_state.feedback_message}</div>",
                 unsafe_allow_html=True
             )
+            
+            # 오답 시 힌트 표시
+            if 'current_hints' in st.session_state and st.session_state.current_hints:
+                with st.expander("🔍 힌트 보기"):
+                    for hint in st.session_state.current_hints:
+                        st.info(hint)
     
     # 입력 필드 - text_input으로 변경
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
@@ -389,6 +409,7 @@ def show_capacity_problem():
                 st.rerun()
             else:
                 st.session_state.feedback_message = "❌ 정답이 옳지 않습니다. 다시 풀어보세요."
+                st.session_state.current_hints = get_capacity_hint(user_answers, correct_answers)
                 st.rerun()
     
     # 통계
@@ -438,6 +459,12 @@ def show_weight_problem():
                 f"<div class='error-message'>{st.session_state.feedback_message}</div>",
                 unsafe_allow_html=True
             )
+            
+            # 오답 시 힌트 표시
+            if 'current_hints' in st.session_state and st.session_state.current_hints:
+                with st.expander("🔍 힌트 보기"):
+                    for hint in st.session_state.current_hints:
+                        st.info(hint)
     
     # 입력 필드 - text_input으로 변경
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
@@ -487,6 +514,7 @@ def show_weight_problem():
                 st.rerun()
             else:
                 st.session_state.feedback_message = "❌ 정답이 옳지 않습니다. 다시 풀어보세요."
+                st.session_state.current_hints = get_weight_hint(user_answers, correct_answers)
                 st.rerun()
     
     # 통계

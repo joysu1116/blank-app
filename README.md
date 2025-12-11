@@ -23,7 +23,25 @@
 - 🥤 **들이** 변환 학습
 - ⚖️ **무게** 변환 학습
 
-### 2️⃣ **길이 변환 문제**
+### 2️⃣ **개념 설명 기능 (새로 추가)**
+각 영역별 문제 화면에서 **"📘 개념 설명 보기"** 버튼으로 다음 내용을 확인할 수 있습니다:
+
+**길이 영역:**
+- mm, cm, m, km의 단위 관계
+- 단위 변환 예시 및 실제 관계식
+- 1 km = 1000 m = 100,000 cm = 1,000,000 mm
+
+**들이 영역:**
+- mL, L의 단위 관계  
+- 1 L = 1000 mL
+- 실생활 예시
+
+**무게 영역:**
+- g, kg, t의 단위 관계
+- 1 kg = 1000 g, 1 t = 1000 kg
+- 실생활 예시
+
+### 3️⃣ **길이 변환 문제**
 ```
 문제 예: 10cm를 mm, cm, m, km으로 변환하세요
 - 범위: 100mm ~ 100,000mm
@@ -31,7 +49,7 @@
 - 오답이면: 메시지 표시 후 재풀이 기회 제공
 ```
 
-### 3️⃣ **들이 변환 문제**
+### 4️⃣ **들이 변환 문제**
 ```
 문제 예: 1000mL을 mL, L로 변환하세요
 - 범위: 10mL ~ 100,000mL
@@ -39,7 +57,7 @@
 - 오답이면: 메시지 표시 후 재풀이 기회 제공
 ```
 
-### 4️⃣ **무게 변환 문제**
+### 5️⃣ **무게 변환 문제**
 ```
 문제 예: 10kg을 g, kg, t로 변환하세요
 - 범위: 10,000g ~ 1,000,000g
@@ -47,7 +65,7 @@
 - 오답이면: 메시지 표시 후 재풀이 기회 제공
 ```
 
-### 5️⃣ **재시작 기능**
+### 6️⃣ **재시작 기능**
 - 화면 하단의 "🔄 재시작" 버튼으로 초기 화면으로 돌아가기
 
 ---
@@ -101,28 +119,29 @@ blank-app/
 ### `converter.py` - 단위 변환 함수
 
 #### `convert_length(value_mm)`
-밀리미터를 모든 길이 단위로 변환합니다.
+밀리미터를 모든 길이 단위로 변환합니다 (**Decimal 기반**).
 ```python
-result = convert_length(100)
-# {'mm': 100, 'cm': 10, 'm': 0.1, 'km': 0.0001}
+result = convert_length(Decimal('100'))
+# {'mm': Decimal('100'), 'cm': Decimal('10'), 'm': Decimal('0.1'), 'km': Decimal('0.0001')}
 ```
 
 #### `convert_capacity(value_ml)`
-밀리리터를 모든 들이 단위로 변환합니다.
+밀리리터를 모든 들이 단위로 변환합니다 (**Decimal 기반**).
 ```python
-result = convert_capacity(1000)
-# {'mL': 1000, 'L': 1}
+result = convert_capacity(Decimal('1000'))
+# {'mL': Decimal('1000'), 'L': Decimal('1')}
 ```
 
 #### `convert_weight(value_g)`
-그램을 모든 무게 단위로 변환합니다.
+그램을 모든 무게 단위로 변환합니다 (**Decimal 기반**).
 ```python
-result = convert_weight(1000)
-# {'g': 1000, 'kg': 1, 't': 0.001}
+result = convert_weight(Decimal('1000'))
+# {'g': Decimal('1000'), 'kg': Decimal('1'), 't': Decimal('0.001')}
 ```
 
 #### `check_answer(user_answers, correct_answers)`
 사용자 입력이 정답과 일치하는지 확인합니다 (소수점 오차 허용).
+**Decimal 기반 정확한 계산으로 반올림 오류를 방지합니다.**
 
 ---
 
@@ -155,15 +174,21 @@ result = convert_weight(1000)
 
 2. **페이지 구성**
    - `show_home_page()`: 초기 화면 (3가지 선택)
-   - `show_length_problem()`: 길이 변환 문제
-   - `show_capacity_problem()`: 들이 변환 문제
-   - `show_weight_problem()`: 무게 변환 문제
+   - `show_length_problem()`: 길이 변환 문제 + 개념 설명
+   - `show_capacity_problem()`: 들이 변환 문제 + 개념 설명
+   - `show_weight_problem()`: 무게 변환 문제 + 개념 설명
 
 3. **UI 디자인**
    - 큰 폰트로 문제 표시
    - 단위별 별도 입력 필드
    - 정답/오답 피드백 메시지
    - 성공 시 풍선 애니메이션
+   - 각 영역별 개념 설명 expander
+
+#### 입력 처리 개선 (v2.0)
+- **text_input() 기반**: number_input 대신 text_input() 사용으로 반올림 제거
+- **Decimal 처리**: 모든 입력값을 Decimal로 변환하여 정확한 계산
+- **오류 처리**: InvalidOperation 예외 처리로 사용자 오입력 방지
 
 ---
 
@@ -179,6 +204,9 @@ result = convert_weight(1000)
 
 ## 🔄 향후 개선 방향
 
+- [x] 개념 설명 기능 추가 (v2.0)
+- [x] 반올림 오류 수정 (Decimal 기반 처리)
+- [x] text_input 기반 입력 방식으로 변경
 - [ ] 점수 및 통계 기록 기능
 - [ ] 난이도 선택 옵션 (쉬움/보통/어려움)
 - [ ] 시간 제한 모드

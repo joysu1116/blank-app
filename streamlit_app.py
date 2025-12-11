@@ -1,9 +1,11 @@
 """
 단위 변환 학습 Streamlit 웹앱
 초등학교 3~4학년 수학 '도형과 측정' 영역 학습 지원
+Decimal을 사용한 정확한 계산 처리
 """
 
 import streamlit as st
+from decimal import Decimal, InvalidOperation
 from utils.generator import (
     generate_length_problem,
     generate_capacity_problem,
@@ -109,6 +111,67 @@ def initialize_session_state():
 initialize_session_state()
 
 
+# 개념 설명 콘텐츠
+LENGTH_CONCEPT = """
+### 길이의 단위
+- **mm(밀리미터)**: 가장 작은 단위
+- **cm(센티미터)**: 1 cm = 10 mm
+- **m(미터)**: 1 m = 100 cm
+- **km(킬로미터)**: 1 km = 1000 m
+
+#### 단위 변환 관계
+1 cm를 10칸으로 똑같이 나누었을 때 작은 눈금 한 칸의 길이는 **'1 mm'**라 씁니다.
+- 예: 8.5 cm = 8.5 센티미터 = 8cm 5mm = 85 mm
+
+100 cm를 **'1 m'**이라 씁니다.
+- 예: 4.5 m = 4.5 미터 = 4 m 50 cm = 450 cm
+
+1000 m를 **'1 km'**이라 씁니다.
+- 예: 1.5 km = 1.5 킬로미터 = 1 km 500 m = 1500 m
+
+#### 전체 변환 관계
+**1 km = 1000 m = 100,000 cm = 1,000,000 mm**
+"""
+
+CAPACITY_CONCEPT = """
+### 들이의 단위
+- **mL(밀리리터)**: 작은 들이 단위
+- **L(리터)**: 1 L = 1000 mL
+
+#### 단위 변환 관계
+1 L = 1000 mL입니다.
+- 예: 1.3 L = 1.3 리터 = 1 L 300 mL = 1300 mL
+
+#### 실생활 예시
+- 물 한 잔: 약 200 mL
+- 우유 한 팩: 약 1 L
+- 큰 물통: 약 10 L
+"""
+
+WEIGHT_CONCEPT = """
+### 무게의 단위
+- **g(그램)**: 작은 무게 단위
+- **kg(킬로그램)**: 1 kg = 1000 g
+- **t(톤)**: 1 t = 1000 kg
+
+#### 단위 변환 관계
+1 kg = 1000 g입니다.
+- 예: 1 kg 500 g = 1 킬로그램 500 그램 = 1500 g
+
+1 t = 1000 kg입니다.
+- 예: 1.5 t = 1.5톤 = 1 t 500 kg = 1500 kg
+
+#### 전체 변환 관계
+**1 t = 1000 kg = 1,000,000 g**
+
+#### 실생활 예시
+- 달걀 한 개: 약 60 g
+- 사과 한 개: 약 200 g
+- 어린이 체중: 약 30 kg
+- 자동차: 약 1 t
+"""
+
+
 def show_home_page():
     """초기 화면 표시"""
     st.markdown("<div class='title'>📐 단위 변환 학습</div>", unsafe_allow_html=True)
@@ -150,6 +213,10 @@ def show_length_problem():
     """길이 변환 문제 화면"""
     st.markdown("<div class='title'>📏 길이 변환</div>", unsafe_allow_html=True)
     
+    # 개념 설명 expander
+    with st.expander("📘 개념 설명 보기"):
+        st.markdown(LENGTH_CONCEPT)
+    
     problem = st.session_state.current_problem
     
     # 문제 표시
@@ -176,26 +243,43 @@ def show_length_problem():
                 unsafe_allow_html=True
             )
     
-    # 입력 필드
+    # 입력 필드 - text_input으로 변경
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
+    st.markdown("**정답을 입력하세요:**")
     
     col1, col2 = st.columns(2)
     with col1:
-        mm_input = st.number_input("mm", value=None, placeholder="숫자 입력", key="length_mm")
-        cm_input = st.number_input("cm", value=None, placeholder="숫자 입력", key="length_cm")
+        mm_input = st.text_input("mm", placeholder="예: 1000", key="length_mm")
+        cm_input = st.text_input("cm", placeholder="예: 100", key="length_cm")
     
     with col2:
-        m_input = st.number_input("m", value=None, placeholder="숫자 입력", key="length_m")
-        km_input = st.number_input("km", value=None, placeholder="숫자 입력", key="length_km")
+        m_input = st.text_input("m", placeholder="예: 1", key="length_m")
+        km_input = st.text_input("km", placeholder="예: 0.001", key="length_km")
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     # 제출 버튼
     if st.button("정답 제출", key="submit_length", use_container_width=True):
-        user_answers = [mm_input, cm_input, m_input, km_input]
-        correct_answers = problem['correct_answers']
+        # 입력값 검증 및 Decimal 변환
+        user_answers = []
+        valid_input = True
         
-        if all(ans is not None for ans in user_answers):
+        for input_val, unit_name in [(mm_input, 'mm'), (cm_input, 'cm'), 
+                                      (m_input, 'm'), (km_input, 'km')]:
+            if not input_val.strip():
+                st.error(f"{unit_name}: 값을 입력해주세요.")
+                valid_input = False
+                break
+            try:
+                user_answers.append(Decimal(input_val))
+            except InvalidOperation:
+                st.error(f"{unit_name}: 숫자를 정확히 입력해주세요.")
+                valid_input = False
+                break
+        
+        if valid_input:
+            correct_answers = problem['correct_answers']
+            
             if check_answer(user_answers, correct_answers):
                 st.session_state.feedback_message = "🎉 정답입니다!"
                 st.session_state.problem_count += 1
@@ -210,8 +294,6 @@ def show_length_problem():
             else:
                 st.session_state.feedback_message = "❌ 정답이 옳지 않습니다. 다시 풀어보세요."
                 st.rerun()
-        else:
-            st.warning("모든 값을 입력해주세요.")
     
     # 통계
     st.markdown(f"<p style='text-align: center; color: #666; margin-top: 2rem;'>"
@@ -219,7 +301,7 @@ def show_length_problem():
                 unsafe_allow_html=True)
     
     # 재시작 버튼
-    if st.button("🔄 재시작", key="restart", use_container_width=True):
+    if st.button("🔄 재시작", key="restart_length", use_container_width=True):
         st.session_state.current_page = 'home'
         st.session_state.current_problem = None
         st.session_state.feedback_message = ''
@@ -230,6 +312,10 @@ def show_length_problem():
 def show_capacity_problem():
     """들이 변환 문제 화면"""
     st.markdown("<div class='title'>🥤 들이 변환</div>", unsafe_allow_html=True)
+    
+    # 개념 설명 expander
+    with st.expander("📘 개념 설명 보기"):
+        st.markdown(CAPACITY_CONCEPT)
     
     problem = st.session_state.current_problem
     
@@ -257,23 +343,39 @@ def show_capacity_problem():
                 unsafe_allow_html=True
             )
     
-    # 입력 필드
+    # 입력 필드 - text_input으로 변경
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
+    st.markdown("**정답을 입력하세요:**")
     
     col1, col2 = st.columns(2)
     with col1:
-        ml_input = st.number_input("mL", value=None, placeholder="숫자 입력", key="capacity_ml")
+        ml_input = st.text_input("mL", placeholder="예: 1300", key="capacity_ml")
     with col2:
-        l_input = st.number_input("L", value=None, placeholder="숫자 입력", key="capacity_l")
+        l_input = st.text_input("L", placeholder="예: 1.3", key="capacity_l")
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     # 제출 버튼
     if st.button("정답 제출", key="submit_capacity", use_container_width=True):
-        user_answers = [ml_input, l_input]
-        correct_answers = problem['correct_answers']
+        # 입력값 검증 및 Decimal 변환
+        user_answers = []
+        valid_input = True
         
-        if all(ans is not None for ans in user_answers):
+        for input_val, unit_name in [(ml_input, 'mL'), (l_input, 'L')]:
+            if not input_val.strip():
+                st.error(f"{unit_name}: 값을 입력해주세요.")
+                valid_input = False
+                break
+            try:
+                user_answers.append(Decimal(input_val))
+            except InvalidOperation:
+                st.error(f"{unit_name}: 숫자를 정확히 입력해주세요.")
+                valid_input = False
+                break
+        
+        if valid_input:
+            correct_answers = problem['correct_answers']
+            
             if check_answer(user_answers, correct_answers):
                 st.session_state.feedback_message = "🎉 정답입니다!"
                 st.session_state.problem_count += 1
@@ -288,8 +390,6 @@ def show_capacity_problem():
             else:
                 st.session_state.feedback_message = "❌ 정답이 옳지 않습니다. 다시 풀어보세요."
                 st.rerun()
-        else:
-            st.warning("모든 값을 입력해주세요.")
     
     # 통계
     st.markdown(f"<p style='text-align: center; color: #666; margin-top: 2rem;'>"
@@ -297,7 +397,7 @@ def show_capacity_problem():
                 unsafe_allow_html=True)
     
     # 재시작 버튼
-    if st.button("🔄 재시작", key="restart", use_container_width=True):
+    if st.button("🔄 재시작", key="restart_capacity", use_container_width=True):
         st.session_state.current_page = 'home'
         st.session_state.current_problem = None
         st.session_state.feedback_message = ''
@@ -308,6 +408,10 @@ def show_capacity_problem():
 def show_weight_problem():
     """무게 변환 문제 화면"""
     st.markdown("<div class='title'>⚖️ 무게 변환</div>", unsafe_allow_html=True)
+    
+    # 개념 설명 expander
+    with st.expander("📘 개념 설명 보기"):
+        st.markdown(WEIGHT_CONCEPT)
     
     problem = st.session_state.current_problem
     
@@ -335,25 +439,41 @@ def show_weight_problem():
                 unsafe_allow_html=True
             )
     
-    # 입력 필드
+    # 입력 필드 - text_input으로 변경
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
+    st.markdown("**정답을 입력하세요:**")
     
     col1, col2 = st.columns(2)
     with col1:
-        g_input = st.number_input("g", value=None, placeholder="숫자 입력", key="weight_g")
-        kg_input = st.number_input("kg", value=None, placeholder="숫자 입력", key="weight_kg")
+        g_input = st.text_input("g", placeholder="예: 1500", key="weight_g")
+        kg_input = st.text_input("kg", placeholder="예: 1.5", key="weight_kg")
     
     with col2:
-        t_input = st.number_input("t", value=None, placeholder="숫자 입력", key="weight_t")
+        t_input = st.text_input("t", placeholder="예: 0.0015", key="weight_t")
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     # 제출 버튼
     if st.button("정답 제출", key="submit_weight", use_container_width=True):
-        user_answers = [g_input, kg_input, t_input]
-        correct_answers = problem['correct_answers']
+        # 입력값 검증 및 Decimal 변환
+        user_answers = []
+        valid_input = True
         
-        if all(ans is not None for ans in user_answers):
+        for input_val, unit_name in [(g_input, 'g'), (kg_input, 'kg'), (t_input, 't')]:
+            if not input_val.strip():
+                st.error(f"{unit_name}: 값을 입력해주세요.")
+                valid_input = False
+                break
+            try:
+                user_answers.append(Decimal(input_val))
+            except InvalidOperation:
+                st.error(f"{unit_name}: 숫자를 정확히 입력해주세요.")
+                valid_input = False
+                break
+        
+        if valid_input:
+            correct_answers = problem['correct_answers']
+            
             if check_answer(user_answers, correct_answers):
                 st.session_state.feedback_message = "🎉 정답입니다!"
                 st.session_state.problem_count += 1
@@ -368,8 +488,6 @@ def show_weight_problem():
             else:
                 st.session_state.feedback_message = "❌ 정답이 옳지 않습니다. 다시 풀어보세요."
                 st.rerun()
-        else:
-            st.warning("모든 값을 입력해주세요.")
     
     # 통계
     st.markdown(f"<p style='text-align: center; color: #666; margin-top: 2rem;'>"
@@ -377,7 +495,7 @@ def show_weight_problem():
                 unsafe_allow_html=True)
     
     # 재시작 버튼
-    if st.button("🔄 재시작", key="restart", use_container_width=True):
+    if st.button("🔄 재시작", key="restart_weight", use_container_width=True):
         st.session_state.current_page = 'home'
         st.session_state.current_problem = None
         st.session_state.feedback_message = ''
